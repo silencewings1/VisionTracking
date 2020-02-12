@@ -6,7 +6,7 @@
 
 ## build && run
 ``` shell
-git clone https://github.com/silencewings1/corner_detection.git
+git clone https://github.com/silencewings1/VisionTracking.git
 ```
 config image/video dir in `main.cpp`
 * vscode in Linux
