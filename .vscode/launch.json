@@ -8,7 +8,7 @@
             "name": "cmake build and run",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/src/run_CornerDetection",
+            "program": "${workspaceFolder}/build/src/run_VisionTracking",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build/src",
