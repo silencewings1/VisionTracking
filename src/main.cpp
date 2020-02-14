@@ -129,7 +129,7 @@ void test_video_2()
 			auto opti = tic();
 			auto [R, t, cost] = optimizator.process(corners_left, corners_right);
 			auto duration = toc(opti, "opti");
-			if (cost >= OPTI_COST_THRESHOLD)
+			if (cost > OPTI_COST_THRESHOLD)
 			{
 				std::cout << "bad at: " << count << ", cost: " << cost << std::endl;
 				bad_avg_time += duration;

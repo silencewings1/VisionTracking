@@ -279,7 +279,7 @@ std::tuple<CornersTemplate, bool> Detector::detectCornersOnMarker(const Maximas&
 				while (true)
 				{
 					auto corner_next = predictNextCorner(comp.second, comp.first);
-					if (corner_next.corr <= CORR_THRESHOLD)
+					if (corner_next.corr < CORR_THRESHOLD)
 						break;
 
 					comp.second = corner_next;
@@ -291,6 +291,8 @@ std::tuple<CornersTemplate, bool> Detector::detectCornersOnMarker(const Maximas&
 		{
 			return { corners_selected, true };
 		}
+
+		corners_selected.clear();
 	}
 
 	return { corners_selected, false };

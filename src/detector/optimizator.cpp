@@ -22,7 +22,7 @@ std::tuple<Eigen::Matrix3d, Eigen::Vector3d, double> Optimizator::process(const 
 {
 	std::tie(left_corners, right_corners) = alignCorners(left, right);
 
-	if (left_corners.size() > 4)
+	if (left_corners.size() >= 4)
 	{
 		/*zhang method*/
 		//auto [M_points, V] = initHomography();
@@ -48,7 +48,7 @@ std::tuple<Eigen::Matrix3d, Eigen::Vector3d, double> Optimizator::process(const 
 	// Eigen::Vector3d center = H_left * Eigen::Vector3d(0, 0, 1);
 	// Corner center_o(center.x() / center.z(), center.y() / center.z());
 
-	return { Eigen::Matrix3d::Identity(),  Eigen::Vector3d::Zero(), 10000 };
+	return { Eigen::Matrix3d::Identity(),  Eigen::Vector3d::Zero(), 100 };
 }
 
 std::tuple<Corners, Corners>
@@ -144,18 +144,9 @@ Optimizator::calcExtrinsicParabyPNP(const std::vector<Eigen::Vector3d>& M_points
 	{
 		Eigen::Matrix3d matrixTemp;
 		Eigen::Vector3d vectTemp;
-		/*cv::Mat Rmat_temp = p4psolver.RoteM;
-		matrixTemp(0, 0) = Rmat_temp.ptr<double>(0)[0]; matrixTemp(0, 1) = Rmat_temp.ptr<double>(0)[1]; matrixTemp(0, 2) = Rmat_temp.ptr<double>(0)[2];
-		matrixTemp(1, 0) = Rmat_temp.ptr<double>(1)[0]; matrixTemp(1, 1) = Rmat_temp.ptr<double>(1)[1]; matrixTemp(1, 2) = Rmat_temp.ptr<double>(1)[2];
-		matrixTemp(2, 0) = Rmat_temp.ptr<double>(2)[0]; matrixTemp(2, 1) = Rmat_temp.ptr<double>(2)[1]; matrixTemp(2, 2) = Rmat_temp.ptr<double>(2)[2];
-
-		cv::Mat Tmat_temp = p4psolver.TransM;
-		vectTemp(0) = Tmat_temp.ptr<double>(0)[0];
-		vectTemp(1) = Tmat_temp.ptr<double>(0)[1];
-		vectTemp(2) = Tmat_temp.ptr<double>(0)[2];*/
-
 		cv2eigen(p4psolver.RoteM, matrixTemp);
 		cv2eigen(p4psolver.TransM, vectTemp);
+
 		return { matrixTemp, vectTemp };
 	}
 	else
@@ -335,7 +326,7 @@ Optimizator::optimizeExtrinsicParabyPNP(const std::vector<Eigen::Vector3d>& M_po
 
 			if (point_cam.z() < 0 && t_test.z() > 0)
 			{
-				if (cost < 1.0)
+				if (cost < OPTI_COST_THRESHOLD / 2)
 				{
 					last_opti_result = true;
 					res_R_last = R_test;
@@ -444,7 +435,7 @@ Optimizator::optimizeExtrinsicParaAll(const std::vector<Eigen::Vector3d>& M_poin
 
 			if (point_cam.z() < 0 && t_test.z() > 0)
 			{
-				if (cost < 1.0)
+				if (cost < OPTI_COST_THRESHOLD / 2)
 				{
 					last_opti_result = true;
 					res_R_last = R_test;
@@ -534,7 +525,7 @@ Optimizator::optimizeExtrinsicPara(const std::vector<Eigen::Vector3d>& M_points,
 
 			if (point_cam.z() < 0 && t.z() > 0)
 			{
-				if (cost < 1.0)
+				if (cost < OPTI_COST_THRESHOLD / 2)
 				{
 					last_opti_result = true;
 					res_R_last = R;
@@ -638,6 +629,7 @@ std::tuple<Eigen::Matrix3d, Eigen::Vector3d, double>
 Optimizator::opti(const Eigen::Matrix3d& R, const Eigen::Vector3d& t, const std::vector<Eigen::Vector3d>& M_points, double pose[6]) const
 {
 	ceres::Problem problem;
+	auto problem_count = 0;
 	for (int i = 0; i < left_corners.size(); ++i)
 	{
 		problem.AddResidualBlock(
@@ -645,6 +637,7 @@ Optimizator::opti(const Eigen::Matrix3d& R, const Eigen::Vector3d& t, const std:
 				new ReprojectionError(R, t, left_corners.at(i), M_points.at(i))),
 			nullptr,
 			pose);
+		++problem_count;
 	}
 	for (int i = 0; i < right_corners.size(); ++i)
 	{
@@ -654,9 +647,11 @@ Optimizator::opti(const Eigen::Matrix3d& R, const Eigen::Vector3d& t, const std:
 				new ReprojectionError(R, t + bias, right_corners.at(i), M_points.at(i))),
 			nullptr,
 			pose);
+		++problem_count;
 	}
 
 	ceres::Solver::Options options;
+	options.trust_region_strategy_type = ceres::LEVENBERG_MARQUARDT;
 	options.linear_solver_type = ceres::DENSE_QR;
 	options.minimizer_progress_to_stdout = false;
 	options.num_threads = 8;
@@ -681,7 +676,7 @@ Optimizator::opti(const Eigen::Matrix3d& R, const Eigen::Vector3d& t, const std:
 
 		return rot;
 	};
-	return { rotRPY(pose[0], pose[1], pose[2]), Eigen::Vector3d(pose[3], pose[4], pose[5]), summary.final_cost / (2 * M_points.size()) };
+	return { rotRPY(pose[0], pose[1], pose[2]), Eigen::Vector3d(pose[3], pose[4], pose[5]), sqrt(summary.final_cost / problem_count) };
 }
 
 void Optimizator::verify(const Eigen::Matrix3d& R, const Eigen::Vector3d& t, const std::vector<Eigen::Vector3d>& M_points) const
