@@ -11,7 +11,7 @@ bool loadConfig()
         0, 0, 1;
     b_dis = 4.0496;
 
-    OPTI_COST_THRESHOLD = 10.0;
+    OPTI_COST_THRESHOLD = 2.0;
 
     return true;
 }

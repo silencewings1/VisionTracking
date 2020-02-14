@@ -18,7 +18,7 @@ Detector::Detector(const cv::Size& size)
 	, HALF_PATCH_SIZE(3)
 	, PATCH_X(calcPatchX())
 	, WIDTH_MIN(10)
-	, CORR_THRESHOLD(0.7f)
+	, CORR_THRESHOLD(0.8f)
 	, rect{ cv::Range(0, size.width), cv::Range(0, size.height) }
 {
 #ifdef USE_CUDA

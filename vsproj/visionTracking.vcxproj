@@ -15,6 +15,7 @@
     <ClCompile Include="..\src\config\config.cpp" />
     <ClCompile Include="..\src\detector\detector.cpp" />
     <ClCompile Include="..\src\detector\optimizator.cpp" />
+    <ClCompile Include="..\src\detector\PNPSolver.cpp" />
     <ClCompile Include="..\src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -26,6 +27,7 @@
     <ClInclude Include="..\src\def\type_def.h" />
     <ClInclude Include="..\src\detector\detector.h" />
     <ClInclude Include="..\src\detector\optimizator.h" />
+    <ClInclude Include="..\src\detector\PNPSolver.h" />
     <ClInclude Include="..\src\detector\processor.h" />
     <ClInclude Include="..\src\detector\rectifier.h" />
   </ItemGroup>

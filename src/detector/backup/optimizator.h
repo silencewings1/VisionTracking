@@ -5,14 +5,12 @@ class Optimizator
 {
 public:
 	/* 3d center, cost */
-	std::tuple<Eigen::Matrix3d, Eigen::Vector3d, double>
+	std::tuple<Eigen::Vector3d, double>
 		process(const Corners& left, const Corners& right);
 
 private:
 	std::tuple<Corners, Corners>
 		alignCorners(Corners left, Corners right) const;
-
-	std::tuple<Eigen::Matrix3d, Eigen::Vector3d> calcExtrinsicParabyPNP(const std::vector<Eigen::Vector3d>& M_points) const;
 
 	/* R, t */
 	std::tuple<Eigen::Matrix3d, Eigen::Vector3d>
@@ -21,15 +19,9 @@ private:
 	std::tuple<std::vector<Eigen::Vector3d>, Eigen::MatrixXd>
 		initHomography() const;
 
-	std::vector<Eigen::Vector3d> getCorresponding3DPoints() const;
-
 	/* R, t, cost */
 	std::tuple<Eigen::Matrix3d, Eigen::Vector3d, double>
 		optimizeExtrinsicPara(const std::vector<Eigen::Vector3d>& M_points, const Eigen::MatrixXd& V) const;
-	std::tuple<Eigen::Matrix3d, Eigen::Vector3d, double>
-		optimizeExtrinsicParabyPNP(const std::vector<Eigen::Vector3d>& M_points) const;
-	std::tuple<Eigen::Matrix3d, Eigen::Vector3d, double>
-		optimizeExtrinsicParaAll(const std::vector<Eigen::Vector3d>& M_points, const Eigen::MatrixXd& V) const;
 
 	/* R, t, cost */
 	std::tuple<Eigen::Matrix3d, Eigen::Vector3d, double>
@@ -41,4 +33,6 @@ private:
 private:
 	Corners left_corners;
 	Corners right_corners;
+
+	mutable double init_pose[6] = { 0,0,0,0,0,0 };
 };
